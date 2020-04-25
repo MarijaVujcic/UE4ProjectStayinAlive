@@ -22,7 +22,7 @@ public:
 	UPROPERTY(Category = "Camera", EditAnywhere)
 		class UCameraComponent* Camera;
 
-	UPROPERTY(Category = "Body", BlueprintReadWrite)
+	/*UPROPERTY(Category = "Body", BlueprintReadWrite)
 		class UStaticMeshComponent* SpaceshipMesh;
 
 	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
@@ -44,7 +44,7 @@ public:
 		class APhysicsThruster* NoseYawThrust;
 
 	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* TailYawThrust;
+		class APhysicsThruster* TailYawThrust;*/
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -69,8 +69,10 @@ public:
 		FVector MuzzleOffset;
 	/** Projectile class to spawn */
 	UPROPERTY(EditAnywhere , Category = Projectile)
-		TSubclassOf<class AProjectiles> ProjectileClass;
-
+		TSubclassOf<class AProjectiles> ProjectileClass1;
+	UPROPERTY(EditAnywhere, Category = Projectile)
+		TSubclassOf<class AProjectiles> ProjectileClass2;
+	float getCurrentForwardSpeed();
 
 private:
 
@@ -91,6 +93,7 @@ private:
 		float MinSpeed;
 
 	/** Current forward speed */
+	UPROPERTY(Category = Yaw, EditAnywhere)
 	float CurrentForwardSpeed;
 
 	/** Current yaw speed */

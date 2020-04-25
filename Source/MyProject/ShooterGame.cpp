@@ -5,5 +5,6 @@
 #include "CrosshairHUD.h"
 AShooterGame::AShooterGame()
 {
-	HUDClass = ACrosshairHUD::StaticClass();
+	
+	
 }

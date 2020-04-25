@@ -3,6 +3,7 @@
 
 #include "SpaceshipCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "CrosshairHUD.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
@@ -14,28 +15,22 @@
 #include "GameFramework/Controller.h"
 #include "Engine/Engine.h"
 #include <stdio.h>
+#include <exception>
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Projectiles.h"
 // Sets default values
 ASpaceshipCharacter::ASpaceshipCharacter()
 {
 	// Create static mesh component
-	this->SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipSkelet"));
+	//this->SpaceshipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpaceshipSkelet"));
 //	this->SpaceshipSkeletalMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());	// Set static mesh
-	RootComponent = this->SpaceshipMesh;
+//	RootComponent = this->SpaceshipMesh;
 
 	this->SpringArm = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	this->SpringArm->SetupAttachment(RootComponent);
-	this->SpringArm->TargetArmLength = 250.0f;
-	this->SpringArm->bEnableCameraLag = false;
-	this->SpringArm->CameraLagSpeed = 15.0f;
-
 	this->Camera = CreateDefaultSubobject<UCameraComponent>("CameraCharacter");
 	this->Camera->SetupAttachment(SpringArm);
 
-	SpringArm->SocketOffset = FVector(0.f, 0.f, 60.f);
-	SpringArm->bEnableCameraLag = false;	// Do not allow camera to lag
-	SpringArm->CameraLagSpeed = 15.f;
 
 	Acceleration = 500.f;
 	TurnSpeed = 70.f;
@@ -61,23 +56,23 @@ void ASpaceshipCharacter::Tick(float DeltaSeconds)
 
 	AddActorLocalRotation(DeltaRotation);
 
-	if (this->CurrentForwardSpeed > 0)
+	/*if (this->CurrentForwardSpeed > 0)
 	{
 		this->CurrentForwardSpeed = this->CurrentForwardSpeed - (this->CurrentForwardSpeed / 5);
 	}
 	if (this->CurrentLRSpeed > 0)
 	{
 		this->CurrentLRSpeed = this->CurrentLRSpeed - (this->CurrentLRSpeed / 5);
-	}
+	}*/
 	Super::Tick(DeltaSeconds);
 
 }
 
-// Called to bind functionality to input
+
 void ASpaceshipCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	check(PlayerInputComponent);
-	// Bind our control axis' to callback functions
+
 	PlayerInputComponent->BindAxis("MoveFoward", this, &ASpaceshipCharacter::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveAround", this, &ASpaceshipCharacter::MoveAround);
 	PlayerInputComponent->BindAxis("Speed", this, &ASpaceshipCharacter::Speed);
@@ -87,7 +82,7 @@ void ASpaceshipCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("TurnPitch", this, &ASpaceshipCharacter::TurnPitch);
 	PlayerInputComponent->BindAxis("Roll", this, &ASpaceshipCharacter::RollMovement);
 
-//	InputComponent->BindAction("Shoot", IE_Pressed, this, &ASpaceshipCharacter::OnFire);
+	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ASpaceshipCharacter::OnFire);
 
 }
 
@@ -95,7 +90,6 @@ void ASpaceshipCharacter::MoveFoward(float value)
 {
 	if ((Controller != NULL) && (value != 0.0f))
 	{
-		// find out which way is forward
 		FRotator Rotation = Controller->GetControlRotation();
 				
 		// add movement in that direction
@@ -124,11 +118,9 @@ void ASpaceshipCharacter::MoveAround(float value)
 }
 void ASpaceshipCharacter::Speed(float value)
 {
-	//stajanje bas ne radi nesto??
 	bool bHasInput = !FMath::IsNearlyEqual(value, 0.f);
 	float CurrentAcc = (value * Acceleration);
 	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Speed: %f - %f - %f"), CurrentForwardSpeed, CurrentYawSpeed, CurrentRollSpeed));
 
 	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
 }
@@ -136,8 +128,7 @@ void ASpaceshipCharacter::Speed(float value)
 void ASpaceshipCharacter::TurnPitch(float value)
 {
 	    
-	float TargetPitchSpeed = (value * TurnSpeed * 5
-		);
+	float TargetPitchSpeed = (value * TurnSpeed * 5);
 	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed));
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 5.f);
 
@@ -145,53 +136,65 @@ void ASpaceshipCharacter::TurnPitch(float value)
 
 void ASpaceshipCharacter::RollMovement(float value)
 {
-	// Target yaw speed is based on input
+
 	float TargetYawSpeed = (value * TurnSpeed);
 
-	// Smoothly interpolate to target yaw speed
 	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 
-	// Is there any left/right input?
 	const bool bIsTurning = FMath::Abs(value) > 0.2f;
-
-	// If turning, yaw value is used to influence roll
-	// If not turning, roll to reverse current roll value.
 	float TargetRollSpeed = bIsTurning ? (CurrentYawSpeed * 0.5f) : (GetActorRotation().Roll * -2.f);
 
-	// Smoothly interpolate roll speed
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ASpaceshipCharacter::OnFire()
 {
-	// try and fire a projectile
-	if (ProjectileClass != NULL)
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("USLO")));
+
+	if (ProjectileClass1 != NULL && ProjectileClass2 != NULL)
 	{
-		// Get the camera transform
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Speed: %f - %f - %f"), CurrentForwardSpeed, CurrentYawSpeed, CurrentRollSpeed));
 		FVector CameraLoc;
 		FRotator CameraRot;
 		GetActorEyesViewPoint(CameraLoc, CameraRot);
 		// MuzzleOffset is in camera space, so transform it to world space before offsetting from the camera to find the final muzzle position
 		FVector const MuzzleLocation = CameraLoc + FTransform(CameraRot).TransformVector(MuzzleOffset);
 		FRotator MuzzleRotation = CameraRot;
-		MuzzleRotation.Pitch += 10.0f;          // skew the aim upwards a bit
+		MuzzleRotation.Pitch += 10.0f;
 		UWorld* const World = GetWorld();
+
 		if (World)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Speed: %f - %f - %f"), CurrentForwardSpeed, CurrentYawSpeed, CurrentRollSpeed));
+
+			FVector coordinate1 = GetActorLocation();
+			FVector coordinate2 = GetActorLocation();
+			coordinate1.X += 25;
+			coordinate2.X += 25;
+			coordinate1.Y += -55;
+			coordinate2.Y += 55;
+
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = Instigator;
-			// spawn the projectile at the muzzle
-			AProjectiles* const Projectile = World->SpawnActor<AProjectiles>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-			if (Projectile)
+			AProjectiles* const Projectile1 = World->SpawnActor<AProjectiles>(this->ProjectileClass1, coordinate1, MuzzleRotation, SpawnParams);
+			AProjectiles* const Projectile2 = World->SpawnActor<AProjectiles>(this->ProjectileClass2, coordinate2, MuzzleRotation, SpawnParams);
+
+			if (Projectile1)
 			{
 				// find launch direction
 				FVector const LaunchDir = MuzzleRotation.Vector();
-				Projectile->InitVelocity(LaunchDir);
+				Projectile1->InitDirection(LaunchDir);
+				Projectile2->InitDirection(LaunchDir);
 			}
 		}
 	}
 
 
+}
+
+float ASpaceshipCharacter::getCurrentForwardSpeed()
+{
+	return CurrentForwardSpeed;
 }
 

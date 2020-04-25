@@ -21,7 +21,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 		class UProjectileMovementComponent* ProjectileMovement;
 	/** inits velocity of the projectile in the shoot direction */
-	void InitVelocity(const FVector& ShootDirection);
+	void InitDirection(const FVector& ShootDirection);
 	/** called when projectile hits something */
 	UFUNCTION()
 		void OnHit(class UPrimitiveComponent* HitComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

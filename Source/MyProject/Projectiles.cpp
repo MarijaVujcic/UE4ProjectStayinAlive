@@ -30,7 +30,7 @@ AProjectiles::AProjectiles(const FObjectInitializer& ObjectInitializer)
 	ProjectileMovement->Bounciness = 0.3f;
 }
 
-void AProjectiles::InitVelocity(const FVector& ShootDirection)
+void AProjectiles::InitDirection(const FVector& ShootDirection)
 {
 	if (ProjectileMovement)
 	{
