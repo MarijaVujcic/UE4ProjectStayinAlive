@@ -28,43 +28,32 @@ void ASpaceshipWeapon::OnFire()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("ON FIRE")));
 	AActor* MyOwner = GetOwner();  //spaceship
 	UWorld* const World = GetWorld();
+
 	if (MyOwner && this->ProjectileClass != NULL && World)
 	{
 		FVector EyeLocation;
 		FRotator EyeRotation;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation); //vrati mi lokaciju i roticaiju kamere "ispuni"
 
-		FVector TraceEnd = EyeLocation + (EyeRotation.Vector()+1);
-		FHitResult Hit;
-		Hit.Actor = this->ProjectileClass;
+		//FCollisionQueryParams QueryParams;
+		FVector coordinate = this->WeponMesh->GetComponentLocation();
+		coordinate.Y += 0.001f;
+
+		FVector ShootDirection = MyOwner->GetActorRotation().Vector();  
 		
+		FTransform SpawnTM(coordinate);  //lokacija za spawn 
 
-		FCollisionQueryParams QueryParams;
-		FVector coordinate1 = this->WeponMesh->GetComponentLocation();
-		coordinate1.Y += 0.001f;
 
-		QueryParams.AddIgnoredActor(MyOwner);
-		QueryParams.AddIgnoredActor(this);
-		QueryParams.bTraceComplex = true;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Z: %f -x %f - %f"), ShootDirection.Z, ShootDirection.X));
+		AProjectiles* const Projectile = Cast<AProjectiles>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ProjectileClass, SpawnTM)); // SPAWN PROJECTILE
 
-		FVector ShootRotation = EyeRotation.Vector();
-		if (GetWorld()->LineTraceSingleByChannel(Hit, coordinate1, TraceEnd, ECC_Visibility, QueryParams))
+		if (Projectile)
 		{
-			//udarilo je u nesto pa damage
-			//AActor *HitActor = Hit.GetActor();
-			//UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShootRotation, Hit, MyOwner->GetInstigatorController(), this, this->DamageType);
+			Projectile->Instigator = Instigator;
+			Projectile->SetOwner(this);
+			Projectile->InitDirection(ShootDirection); //init velocity
+			UGameplayStatics::FinishSpawningActor(Projectile, SpawnTM);
 
-		}
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = GetInstigator();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Speed: %f - %f - %f"), coordinate1.X));
-		AProjectiles* const Projectile1 = World->SpawnActor<AProjectiles>(this->ProjectileClass, coordinate1, EyeRotation, SpawnParams);
-
-		if (Projectile1)
-		{
-			Projectile1->InitDirection(ShootRotation+EyeLocation);
 		}
 	
 

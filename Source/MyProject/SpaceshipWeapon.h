@@ -28,7 +28,7 @@ protected:
 		FVector MuzzleOffset;
 	/** Projectile class to spawn */
 	UPROPERTY(EditAnywhere, Category = "Shooting")
-		class AProjectiles* ProjectileClass;
+		TSubclassOf<class AProjectiles> ProjectileClass;
 
 public:	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly,Category = "Shooting")

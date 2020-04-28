@@ -37,17 +37,17 @@ void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		OtherComp->AddImpulseAtLocation(ProjectileMovement->Velocity * 100.0f, Hit.ImpactPoint);
+		this->Destroy();  //definitivno unistiti projectile
 	}
 }
 
-// Called when the game starts or when spawned
+
 void AProjectiles::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void AProjectiles::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
