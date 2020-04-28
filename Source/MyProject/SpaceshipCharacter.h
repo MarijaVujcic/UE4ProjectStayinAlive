@@ -12,47 +12,25 @@ class MYPROJECT_API ASpaceshipCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	
 	ASpaceshipCharacter();
+
+	virtual FVector GetPawnViewLocation() const override;
 
 	UPROPERTY(Category = "Camera", EditAnywhere)
 		class USpringArmComponent* SpringArm;
 
-	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = "Camera", EditAnywhere)
-		class UCameraComponent* Camera;
+		class UCameraComponent* Camera; 
+	UPROPERTY(Category = "Body", VisibleAnywhere, BluePrintReadOnly)
+		class USkeletalMeshComponent* SpaceshipMesh;
 
-	/*UPROPERTY(Category = "Body", BlueprintReadWrite)
-		class UStaticMeshComponent* SpaceshipMesh;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* NoseThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* TailThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* LeftWingRoolThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* RightWingRoolThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* RollThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* NoseYawThrust;
-
-	UPROPERTY(Category = "Physic", VisibleDefaultsOnly, BlueprintReadWrite)
-		class APhysicsThruster* TailYawThrust;*/
-
-	// Called every frame
+	
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	//functions for movments
+	
 	void MoveFoward(float value);
 	void MoveAround(float value);
 	void Speed(float value);
@@ -64,15 +42,6 @@ public:
 	
 	UFUNCTION()
 		void OnFire();
-	/** Gun muzzle's offset from the camera location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		FVector MuzzleOffset;
-	/** Projectile class to spawn */
-	UPROPERTY(EditAnywhere , Category = Projectile)
-		TSubclassOf<class AProjectiles> ProjectileClass1;
-	UPROPERTY(EditAnywhere, Category = Projectile)
-		TSubclassOf<class AProjectiles> ProjectileClass2;
-	float getCurrentForwardSpeed();
 
 private:
 
