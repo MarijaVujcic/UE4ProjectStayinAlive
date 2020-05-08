@@ -19,8 +19,6 @@ ASpaceshipWeapon::ASpaceshipWeapon()
 
 }
 
-
-
 void ASpaceshipWeapon::OnFire()
 {
 	//mozda u Ifu provjerit
@@ -38,13 +36,14 @@ void ASpaceshipWeapon::OnFire()
 		//FCollisionQueryParams QueryParams;
 		FVector coordinate = this->WeponMesh->GetComponentLocation();
 		coordinate.Y += 0.001f;
-
-		FVector ShootDirection = MyOwner->GetActorRotation().Vector();  
+		FRotator ShootRotation = MyOwner->GetActorRotation();
+		ShootRotation.Pitch += 10.f;
+		FVector ShootDirection = ShootRotation.Vector();  
 		
 		FTransform SpawnTM(coordinate);  //lokacija za spawn 
 
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Z: %f -x %f - %f"), ShootDirection.Z, ShootDirection.X));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Z: %f -x %f - %f"), ShootDirection.Z, ShootDirection.X));
 		AProjectiles* const Projectile = Cast<AProjectiles>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ProjectileClass, SpawnTM)); // SPAWN PROJECTILE
 
 		if (Projectile)
@@ -55,7 +54,6 @@ void ASpaceshipWeapon::OnFire()
 			UGameplayStatics::FinishSpawningActor(Projectile, SpawnTM);
 
 		}
-	
 
 	}
 	

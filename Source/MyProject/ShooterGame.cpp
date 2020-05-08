@@ -6,4 +6,5 @@
 AShooterGame::AShooterGame()
 {
 	HUDClass = ACrosshairHUD::StaticClass();
+
 }

@@ -30,7 +30,7 @@ ASpaceshipCharacter::ASpaceshipCharacter()
 	
 	Acceleration = 500.f;
 	TurnSpeed = 70.f;
-	MaxSpeed = 4000.f;
+	MaxSpeed = 10000.f;
 	MinSpeed = 0.f;
 	CurrentForwardSpeed = 0.f;
 }
@@ -60,7 +60,6 @@ void ASpaceshipCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 }
-
 
 void ASpaceshipCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -110,11 +109,14 @@ void ASpaceshipCharacter::MoveAround(float value)
 	}
 	
 }
+
+// ako x onda da se smanjiva brzina
 void ASpaceshipCharacter::Speed(float value)
 {
 	bool bHasInput = !FMath::IsNearlyEqual(value, 0.f);
 	float CurrentAcc = (value * Acceleration);
 	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
+	
 
 	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
 }
@@ -141,11 +143,6 @@ void ASpaceshipCharacter::RollMovement(float value)
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void ASpaceshipCharacter::OnFire()
-{
-	
-
-}
 
 
 

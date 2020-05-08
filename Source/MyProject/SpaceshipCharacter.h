@@ -40,9 +40,6 @@ public:
 	void YawMovement(float value);
 	void RollMovement(float value);
 	
-	UFUNCTION()
-		void OnFire();
-
 private:
 
 	/** How quickly forward speed changes */

@@ -2,6 +2,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
+// life of projectiles namistit, plutaju u svemiru??
 AProjectiles::AProjectiles(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
