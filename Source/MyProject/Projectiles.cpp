@@ -43,6 +43,8 @@ void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 }
 
 
+
+
 void AProjectiles::BeginPlay()
 {
 	Super::BeginPlay();

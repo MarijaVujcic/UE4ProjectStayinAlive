@@ -23,7 +23,7 @@ void ASpaceshipWeapon::OnFire()
 {
 	//mozda u Ifu provjerit
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("ON FIRE")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("ON FIRE")));
 	AActor* MyOwner = GetOwner();  //spaceship
 	UWorld* const World = GetWorld();
 
@@ -57,7 +57,6 @@ void ASpaceshipWeapon::OnFire()
 
 	}
 	
-
 }
 
 
