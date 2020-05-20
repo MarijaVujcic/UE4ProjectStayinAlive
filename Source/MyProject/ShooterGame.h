@@ -49,5 +49,6 @@ private:
 	void CheckLevel();
 	void ReadGameInfo();
 	void WriteGameInfo();
+	void UpdateGameInfo();
 
 };
