@@ -11,17 +11,20 @@
 
 AShooterGame::AShooterGame()
 {
-	this->CurrentLevelNumber = 0; //namistit da cita kasnije iz .txt ili neke vrste datoteke
+	this->CurrentLevelNumber = 0;
 	this->GameInfoFile = "GameInfo.txt";
-	HUDClass = ACrosshairHUD::StaticClass();
-
+	
 }
-// implementirat rad sa fileom, updateanje filea ako je level completed
-// i malo bolje ove funkcije napisat
+// SMISLIT ZA LOAD COMPLETED LEVELE ??? KAKO LOADAT, MALO PROC KROZ KOD I OPTIMIZIRAT GA I HUD DA SE STVORI SAMO U ODOBRANIM?
+/*
+* BeginPlay - called when the game begin (when object of this class is made), sets informations of game, and load next
+* level to be played
+*/
 void AShooterGame::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("BEGIN PLAY SHOOTER GAME ")));
+	bool GameCompleted = false;
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("BEGIN PLAY SHOOTER GAME ")));
 
 	if(this->GameLevels.Num() == 0)
 	{
@@ -32,63 +35,49 @@ void AShooterGame::BeginPlay()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("READ")));
 
-		this->ReadGameInfo();
+		GameCompleted = this->ReadGameInfo();
 	}
 	else
 	{
-		this->WriteGameInfo();
+		this->WriteGameInfo("");
 	}
+	if (!GameCompleted)
+	{
+		UGameplayStatics::OpenLevel(this, FName(*this->EndGameMap, true));
+	}
+	else if(! GetWorld()->GetMapName().Equals(this->GameLevels[this->CurrentLevelNumber])){
 
-	if (GetWorld()->GetMapName() != *this->GameLevels[this->CurrentLevelNumber]) {
 		UGameplayStatics::OpenLevel(this, FName(*this->GameLevels[this->CurrentLevelNumber]), true);
 	}
-
-//	////this->DefaultPlayerController->bShowMouseCursor = true;
-//	//if (!this->MainMenuWidgetName)
-//	//{
-//	//	
-//	//}
-//	///*UGameplayStatics::OpenLevel(this, FName(*this->MainMenuLevel), true);*/
-//	//
-//	///*FInputModeUIOnly InputMode;
-//	//this->DefaultPlayerController->SetInputMode(InputMode);*/
-
+	HUDClass = ACrosshairHUD::StaticClass();
 
 }
 
-void AShooterGame::LoadNextLevel()
+/*
+* LoadNextLevel Checks if nect level exist in GameLevels array, if does, it sets next level as current and return true, otherwise return false
+*/
+bool AShooterGame::LoadNextLevel()
 {
 	if (this->GameLevels.Contains(this->NextLevelName))
 	{
 		this->CurrentLevelNumber=this->GameLevels.Find(this->NextLevelName);
 		this->CurrentLevelName = this->NextLevelName;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"),this->CurrentLevelNumber));
-
+		return true;
 	}
-	else
-	{
-		//nema sljedeceg levela igra je gotova, neki vidget ili nesto, bool ?
-	}
+	return false;
 }
 
-void AShooterGame::LevelComplete()
-{/*
-	if (this->DeafultLevelCompleteWidget)
-	{
-		this->LevelCompleteWidget = CreateWidget<UUserWidget>(GetWorld(), this->DeafultLevelCompleteWidget);
-		this->LevelCompleteWidget->AddToViewport();
-	}
-	GetWorldTimerManager().SetTimer(this->LevelSwap, this, &AShooterGame::LoadNextLevel, 2.0f, false);*/
-}
-//
-void AShooterGame::EndGame()
+/*
+* Method mostly called in blueprint for settng score and status to certain level (status is hardcoded as 'COMPLETED' for now)
+* @param FString - Level which is completed
+* @param int32 - score accomplished in that level
+*/
+void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, int32 Score)
 {
-	FString LevelName = GetWorld()->GetMapName();
-	FName LoadingLevel = FName(*LevelName);
-   
-	UGameplayStatics::OpenLevel(this, LoadingLevel, true);
+	WriteGameInfo(LevelWhichIsCompleted, Score);
 }
-//
+
+
 void AShooterGame::CheckLevel()
 {
 	this->CurrentLevelName = GetWorld()->GetMapName();
@@ -109,40 +98,36 @@ void AShooterGame::CheckLevel()
 /*
 *
 * ReadGameInfo - (if GameInfoFile exist) parse GameInfoFile and sets which level need to open while starting the game
+* returns false in case game is completed(there are no more levels to read), true otherwise
 *
 */
-void AShooterGame::ReadGameInfo()
-{ 
-	// napisat parsinranje tako da procita string
-		//IPlatformFile& Reading= FPlatformFileManager::Get().GetPlatformFile();
-
-	//IFileHandle* FileHandle = Reading.OpenRead(*FilePath);
-	//if (FileHandle)
-	//{
-	//	FileHandle->Seek(183);
-	//	FileHandle.
-	//}
+bool AShooterGame::ReadGameInfo()
+{
 	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
-	FString ReadValue;
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("READ")));
 
-	FFileHelper::LoadFileToString(ReadValue,*(FilePath));
+	FFileHelper::LoadFileToString(this->ReadValue,*(FilePath));
 	int32 RetIndex = 0;
 	bool CompletedExist;
 	FString MakeNew;
-	CompletedExist = ReadValue.Contains("COMPLETED");
+	CompletedExist = this->ReadValue.Contains("COMPLETED");
 	if (CompletedExist)
 	{
-		RetIndex = ReadValue.Find("COMPLETED");
+		RetIndex = this->ReadValue.Find("COMPLETED");
 		RetIndex += 10;
-		while ( ReadValue[RetIndex] != ' ')
-	{
-			MakeNew.AppendChar(ReadValue[RetIndex]);
+		if (RetIndex >= this->ReadValue.Len())
+		{
+			return false;
+		}
+		while ( this->ReadValue[RetIndex] != ' ')
+		{
+			MakeNew.AppendChar(this->ReadValue[RetIndex]);
 			RetIndex += 1;
-	}
+		}
 		this->NextLevelName = MakeNew;
-		LoadNextLevel();
+		return LoadNextLevel();
 	}
+	return true;
 }
 
 /*
@@ -150,9 +135,15 @@ void AShooterGame::ReadGameInfo()
 * WriteGameInfo - (if GameInfoFile doesn't exist, first time creation of file) create and write levels informations in GameInfoFile
 *
 */
-void AShooterGame::WriteGameInfo()
+void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, int32 Score)
 {
 	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
+	if (LevelWhichIsCompleted != "")
+	{
+		IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
+		Reading.DeleteFile(*FilePath);
+	}
+
 	FString FileHeader = TEXT("*****************************************************\n");
 	FileHeader += TEXT("***************   GAME INFO FILE   ******************\n");
 	FileHeader += TEXT("*****************************************************\n");
@@ -161,19 +152,20 @@ void AShooterGame::WriteGameInfo()
 	for (int i = 0; i < this->GameLevels.Num(); i++)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("FOR")));
-
-		FileContent +=  this->GameLevels[i] + TEXT(" 0 \n");
+		if (LevelWhichIsCompleted.Equals(this->GameLevels[i]))
+		{
+			FileContent +=   this->GameLevels[i] + ' ' + FString::FromInt(Score) +" COMPLETED\n";
+		}
+		else
+		{
+			FileContent += this->GameLevels[i] + " 0 \n";
+		}
+		
 	}
+
 	FFileHelper::SaveStringToFile(FileHeader, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 	FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 
 }
 
-/*
-*
-* UpdateGameInfo - (if GameInfoFile doesn't exist) update GameInfoFile with new status COMPLETED of level and score
-*
-*/
-void AShooterGame::UpdateGameInfo()
-{
-}
+

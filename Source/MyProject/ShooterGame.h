@@ -14,12 +14,12 @@ class MYPROJECT_API AShooterGame : public AGameModeBase
 public:
 
 	AShooterGame();
+	/*UFUNCTION(BlueprintCallable)
+	void EndGame();*/
 	UFUNCTION(BlueprintCallable)
-	void EndGame();
+	void LevelComplete(FString LevelWhichIsCompleted, int32 Score);
 	UFUNCTION(BlueprintCallable)
-	void LevelComplete();
-	UFUNCTION(BlueprintCallable)
-	void LoadNextLevel();
+	bool LoadNextLevel();
 
 
 protected:
@@ -32,8 +32,9 @@ protected:
 		class UUserWidget* GameCompleteWidget;
 
 	FTimerHandle LevelSwap;
+	FString GameInfoFile;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Files")
-		FString GameInfoFile;
+		FString EndGameMap;
 private:
 	void BeginPlay() override;
 
@@ -45,10 +46,10 @@ private:
 	int32 CurrentLevelNumber;
 	FString NextLevelName;
 	FString CurrentLevelName;
+	FString ReadValue;
 
 	void CheckLevel();
-	void ReadGameInfo();
-	void WriteGameInfo();
-	void UpdateGameInfo();
+	bool ReadGameInfo();
+	void WriteGameInfo(FString LevelWhichIsCompleted, int32 Score=0);
 
 };
