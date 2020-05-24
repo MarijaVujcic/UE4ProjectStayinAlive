@@ -4,8 +4,8 @@
 #include "Misc/Paths.h"
 #include "CrosshairHUD.h"
 #include "Engine/Engine.h"
-#include "GenericPlatform/GenericPlatformFile.h"
 #include "Blueprint/UserWidget.h"
+#include "Misc/DefaultValueHelper.h"
 #include "Kismet/GameplayStatics.h"
 #include <Runtime\Core\Public\HAL\PlatformFilemanager.h>
 
@@ -16,6 +16,7 @@ AShooterGame::AShooterGame()
 	
 }
 // SMISLIT ZA LOAD COMPLETED LEVELE ??? KAKO LOADAT, MALO PROC KROZ KOD I OPTIMIZIRAT GA I HUD DA SE STVORI SAMO U ODOBRANIM?
+// Malo bolje ovo parsiranje
 /*
 * BeginPlay - called when the game begin (when object of this class is made), sets informations of game, and load next
 * level to be played
@@ -24,28 +25,33 @@ void AShooterGame::BeginPlay()
 {
 	Super::BeginPlay();
 	bool GameCompleted = false;
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("BEGIN PLAY SHOOTER GAME ")));
-
 	if(this->GameLevels.Num() == 0)
 	{
-		// pozvati neki error widget
+		// pozvati neki error widget ILI TO U BLUEPRINTU
 	}
 
     if (FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("READ")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("READ")));
 
 		GameCompleted = this->ReadGameInfo();
+		int32 l = this->ReadTotalScore();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Begin %d"), l));
+
 	}
 	else
 	{
 		this->WriteGameInfo("");
 	}
+	
+
 	if (!GameCompleted)
 	{
+
 		UGameplayStatics::OpenLevel(this, FName(*this->EndGameMap, true));
 	}
 	else if(! GetWorld()->GetMapName().Equals(this->GameLevels[this->CurrentLevelNumber])){
+
 
 		UGameplayStatics::OpenLevel(this, FName(*this->GameLevels[this->CurrentLevelNumber]), true);
 	}
@@ -77,7 +83,6 @@ void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, int32 Score)
 	WriteGameInfo(LevelWhichIsCompleted, Score);
 }
 
-
 void AShooterGame::CheckLevel()
 {
 	this->CurrentLevelName = GetWorld()->GetMapName();
@@ -104,7 +109,7 @@ void AShooterGame::CheckLevel()
 bool AShooterGame::ReadGameInfo()
 {
 	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("READ")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("READ")));
 
 	FFileHelper::LoadFileToString(this->ReadValue,*(FilePath));
 	int32 RetIndex = 0;
@@ -113,9 +118,9 @@ bool AShooterGame::ReadGameInfo()
 	CompletedExist = this->ReadValue.Contains("COMPLETED");
 	if (CompletedExist)
 	{
-		RetIndex = this->ReadValue.Find("COMPLETED");
+		RetIndex = this->ReadValue.Find("COMPLETED", ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 		RetIndex += 10;
-		if (RetIndex >= this->ReadValue.Len())
+		if (RetIndex+1 >= this->ReadValue.Len())
 		{
 			return false;
 		}
@@ -151,7 +156,7 @@ void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, int32 Score)
 	FString FileContent;
 	for (int i = 0; i < this->GameLevels.Num(); i++)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("FOR")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("FOR")));
 		if (LevelWhichIsCompleted.Equals(this->GameLevels[i]))
 		{
 			FileContent +=   this->GameLevels[i] + ' ' + FString::FromInt(Score) +" COMPLETED\n";
@@ -168,4 +173,37 @@ void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, int32 Score)
 
 }
 
+/*
+* Reads total score of completed levels
+* @return int32 total game score
+*/
+int32 AShooterGame::ReadTotalScore()
+{
+	if (! FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile) || this->GameLevels.Num()==0 /*|| !this->ReadValue.Contains("COMPLETED")*/)
+	{
+		return 0;
+	}
+	int32 ReturnScore = 0;
+	int32 FindCompleted = 0;
+	FString Number;
 
+	for (int i = 0; i <= this->GameLevels.Num()-1; i++)
+	{
+		FindCompleted = this->ReadValue.Find(this->GameLevels[i]);
+		FindCompleted += this->GameLevels[i].Len() + 1;
+
+		while( this->ReadValue[FindCompleted] != '\n' )
+		{
+			if (this->ReadValue[FindCompleted] == ' ')
+			{
+				break;
+			}
+			Number.AppendChar(this->ReadValue[FindCompleted]);
+
+			FindCompleted+=1;
+		}
+		ReturnScore += FCString::Atoi(*Number);
+		Number.Empty();
+	}
+	return ReturnScore;
+}

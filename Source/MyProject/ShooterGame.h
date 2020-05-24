@@ -21,6 +21,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool LoadNextLevel();
 
+	int32 ReadTotalScore();
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
@@ -28,13 +30,14 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
 		TSubclassOf<class UUserWidget> DeafultGameCompleteWidget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
 		class UUserWidget* GameCompleteWidget;
 
-	FTimerHandle LevelSwap;
-	FString GameInfoFile;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Files")
 		FString EndGameMap;
+
+	FString GameInfoFile;
 private:
 	void BeginPlay() override;
 

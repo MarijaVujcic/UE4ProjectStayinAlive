@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "SpaceshipCharacter.h"
 #include "UObject/ConstructorHelpers.h"
@@ -9,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "ShooterGame.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/Controller.h"
@@ -19,30 +18,21 @@
 
 ASpaceshipCharacter::ASpaceshipCharacter()
 {
-	// Create static mesh component
 	this->SpaceshipMesh = GetMesh();
 	//this->SpaceshipMesh->SetupAttachment(GetCapsuleComponent());
 	this->SpringArm = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	this->SpringArm->SetupAttachment(RootComponent);
 	this->Camera = CreateDefaultSubobject<UCameraComponent>("CameraCharacter");
 	this->Camera->SetupAttachment(SpringArm);
-
-	
+;
 	Acceleration = 500.f;
 	TurnSpeed = 70.f;
 	MaxSpeed = 10000.f;
 	MinSpeed = 0.f;
 	CurrentForwardSpeed = 0.f;
-}
 
-FVector ASpaceshipCharacter::GetPawnViewLocation() const
-{
-	if (this->Camera)
-	{
-		return this->Camera->GetComponentLocation();
+	this->LevelScore = 0;
 
-	}
-	return Super::GetPawnViewLocation();
 }
 
 void ASpaceshipCharacter::Tick(float DeltaSeconds)
@@ -143,6 +133,19 @@ void ASpaceshipCharacter::RollMovement(float value)
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
+FVector ASpaceshipCharacter::GetPawnViewLocation() const
+{
+	if (this->Camera)
+	{
+		return this->Camera->GetComponentLocation();
+
+	}
+	return Super::GetPawnViewLocation();
+}
 
 
-
+// procitat score iz filea GameInfo, sveukupni score i postavit si score varijablu
+void ASpaceshipCharacter::SetScore(int32 Total)
+{
+	this->TotalScore = Total;;
+}

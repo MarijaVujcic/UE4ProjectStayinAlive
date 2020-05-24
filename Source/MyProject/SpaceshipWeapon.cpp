@@ -52,6 +52,7 @@ void ASpaceshipWeapon::OnFire()
 			Projectile->SetOwner(this);
 			Projectile->InitDirection(ShootDirection); //init velocity
 			UGameplayStatics::FinishSpawningActor(Projectile, SpawnTM);
+			
 
 		}
 

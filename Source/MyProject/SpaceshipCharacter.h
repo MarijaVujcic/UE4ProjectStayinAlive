@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,7 +22,14 @@ public:
 		class UCameraComponent* Camera; 
 	UPROPERTY(Category = "Body", VisibleAnywhere, BluePrintReadOnly)
 		class USkeletalMeshComponent* SpaceshipMesh;
+	UPROPERTY(Category = "Game", VisibleAnywhere, BluePrintReadOnly)
+		int32 TotalScore;
+	UPROPERTY(Category = "Game", VisibleAnywhere, BluePrintReadOnly)
+		int32 LevelScore;
 
+
+	UFUNCTION(BlueprintCallable)
+		void SetScore(int32 Total);
 	
 	virtual void Tick(float DeltaTime) override;
 
