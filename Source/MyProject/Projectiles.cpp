@@ -1,30 +1,31 @@
 #include "Projectiles.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
-// life of projectiles namistit, plutaju u svemiru??
-AProjectiles::AProjectiles(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+AProjectiles::AProjectiles()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	CollisionComp = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("SphereComp"));
-	CollisionComp->OnComponentHit.AddDynamic(this, &AProjectiles::OnHit);
+	this->SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComp");
+	
+	this->SphereCollisionComponent->InitSphereRadius(1.0f);
 
-	CollisionComp->InitSphereRadius(1.0f);
+	this->RootComponent = SphereCollisionComponent;
+	this->SphereCollisionComponent->SetSimulatePhysics(true);
+	this->ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMeshComponent");
+	this->ProjectileMesh->SetupAttachment(this->RootComponent);
 
-	RootComponent = CollisionComp;
-	CollisionComp->SetSimulatePhysics(true);
+	this->ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileComp");
+	this->ProjectileMovement->UpdatedComponent = SphereCollisionComponent;
+	this->ProjectileMovement->InitialSpeed = 10000.f;
+	this->ProjectileMovement->MaxSpeed = 30000.f;
+	this->ProjectileMovement->bRotationFollowsVelocity = true;
+	this->ProjectileMovement->bShouldBounce = true;
+	this->ProjectileMovement->Bounciness = 0.3f;
 
-	ProjectileMovement = ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileComp"));
-	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 30000.f;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = true;
-	ProjectileMovement->Bounciness = 0.3f;
-	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	//this->SetLifeSpan(2.0f); 
+	this->SphereCollisionComponent->BodyInstance.SetCollisionProfileName("Projectile");
+	this->SphereCollisionComponent->OnComponentHit.AddDynamic(this, &AProjectiles::OnHit);
 }
 
 void AProjectiles::InitDirection(const FVector& ShootDirection)
@@ -37,25 +38,22 @@ void AProjectiles::InitDirection(const FVector& ShootDirection)
 
 void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == this->GetOwner()->GetOwner())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("I Hit: %s"), *OtherActor->GetName()));
-       
-	}
-	else if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		// ovo pise mene
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("I Hit: %s"), *OtherActor->GetName()));
-		OtherComp->AddImpulseAtLocation(ProjectileMovement->Velocity * 100.0f, Hit.ImpactPoint);
-		this->Destroy();  //definitivno unistiti projectile
-	}
-}
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("I GOT INTO ONHIT")));
 
+	if (OtherActor && (OtherActor != this) && OtherComp && (OtherActor != this->GetOwner()->GetOwner()))
+	{
+		TSubclassOf<UDamageType> DamageType;
+		AController* ControllerDamage = this->GetOwner()->GetOwner()->GetInstigatorController();
+		AActor* Damager = GetInstigator();
+		FDamageEvent DamageEvent;
+		OtherActor->TakeDamage(this->DamageAmount, DamageEvent, ControllerDamage, this);
+	}
+	this->Destroy();
+}
 
 void AProjectiles::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
 void AProjectiles::Tick(float DeltaTime)

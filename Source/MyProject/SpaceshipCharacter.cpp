@@ -64,9 +64,6 @@ void ASpaceshipCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("TurnYaw", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnPitch", this, &ASpaceshipCharacter::TurnPitch);
 	PlayerInputComponent->BindAxis("Roll", this, &ASpaceshipCharacter::RollMovement);
-
-	//PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ASpaceshipCharacter::OnFire);
-
 }
 
 void ASpaceshipCharacter::MoveFoward(float value)
@@ -75,7 +72,6 @@ void ASpaceshipCharacter::MoveFoward(float value)
 	{
 		FRotator Rotation = Controller->GetControlRotation();
 				
-		// add movement in that direction
 		const FVector Direction = FRotationMatrix(Rotation).GetScaledAxis(EAxis::X);
 		AddMovementInput(Direction, value);
 		CurrentForwardSpeed = FMath::FInterpTo(CurrentForwardSpeed, value*Acceleration, GetWorld()->GetDeltaSeconds(), 2.f);

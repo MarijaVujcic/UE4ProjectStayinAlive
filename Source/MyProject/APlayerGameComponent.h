@@ -4,17 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "AHealthComponent.generated.h"
+#include "APlayerGameComponent.generated.h"
 
-
+// staviti amo total score i current score i zapisivat to
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class MYPROJECT_API UAHealthComponent : public UActorComponent
+class MYPROJECT_API UAPlayerGameComponent : public UActorComponent
 {
 	GENERATED_BODY()
-		// staviti razlicite bodove za razlicite objekte koji me demagaju
 public:	
-	// Sets default values for this component's properties
-	UAHealthComponent();
+	UAPlayerGameComponent();
 
 protected:
 	// Called when the game starts
@@ -24,6 +22,8 @@ protected:
 		float DefaultHealth;
 	UPROPERTY(BlueprintReadWrite)
 		float MainHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
+		float LevelScore;
 
 	UFUNCTION()
 	void TakeDamage( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

@@ -39,10 +39,7 @@ public:
 	void MoveFoward(float value);
 	void MoveAround(float value);
 	void Speed(float value);
-	void TurnRate(float value);
 	void TurnPitch(float value);
-	void PitchMovement(float value);
-	void YawMovement(float value);
 	void RollMovement(float value);
 	
 private:

@@ -5,54 +5,70 @@
 #include "ShooterGame.generated.h"
 
 /**
- * 
+ * Game Mode class with main logic of game
  */
 UCLASS()
 class MYPROJECT_API AShooterGame : public AGameModeBase
 {
 	GENERATED_BODY()
+
 public:
 
 	AShooterGame();
-	/*UFUNCTION(BlueprintCallable)
-	void EndGame();*/
 	UFUNCTION(BlueprintCallable)
-	void LevelComplete(FString LevelWhichIsCompleted, int32 Score);
-	UFUNCTION(BlueprintCallable)
-	bool LoadNextLevel();
+	void LevelComplete(FString LevelWhichIsCompleted, float Score);
 
+	UFUNCTION(BlueprintCallable)
+	bool SetLevel(FString LevelToSet);
+
+	UFUNCTION(BlueprintCallable)
 	int32 ReadTotalScore();
 
+	UFUNCTION(BlueprintCallable)
+		int32 ReadLevelScore(FString LevelName);
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
+	UFUNCTION(BlueprintCallable)
+		void RewriteScore(int32 LevelScore, FString LevelName);
+
+	UFUNCTION(BlueprintCallable)
+	bool ReadGameInfo();
+
+	UFUNCTION(BlueprintCallable)
+		void StartLevel();
+
+	UFUNCTION(BlueprintCallable)
+		void RepeatLevel(FString LevelName);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
 		class UUserWidget* LevelCompleteWidget;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
-		TSubclassOf<class UUserWidget> DeafultGameCompleteWidget;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
 		class UUserWidget* GameCompleteWidget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Files")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
 		FString EndGameMap;
 
-	FString GameInfoFile;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Files")
+		FString GameInfoFile;
+	UPROPERTY( BlueprintReadOnly)
+		FString NextLevelName;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool GameCompleted;
+
 private:
+
 	void BeginPlay() override;
 
-	// names of levels to be loaded in game
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Levels")
 		TArray<FString> GameLevels;
 
 	class APlayerController* DefaultPlayerController;
 	int32 CurrentLevelNumber;
-	FString NextLevelName;
+	
 	FString CurrentLevelName;
 	FString ReadValue;
 
-	void CheckLevel();
-	bool ReadGameInfo();
-	void WriteGameInfo(FString LevelWhichIsCompleted, int32 Score=0);
+
+	void WriteGameInfo(FString LevelWhichIsCompleted, float Score=0.0f);
 
 };
