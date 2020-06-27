@@ -38,9 +38,7 @@ void AProjectiles::InitDirection(const FVector& ShootDirection)
 
 void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::Printf(TEXT("I GOT INTO ONHIT")));
-
-	if (OtherActor && (OtherActor != this) && OtherComp && (OtherActor != this->GetOwner()->GetOwner()))
+	if (OtherActor && (OtherActor != this) && OtherActor && (OtherActor != this->GetOwner()->GetOwner()))
 	{
 		TSubclassOf<UDamageType> DamageType;
 		AController* ControllerDamage = this->GetOwner()->GetOwner()->GetInstigatorController();
@@ -51,14 +49,5 @@ void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	this->Destroy();
 }
 
-void AProjectiles::BeginPlay()
-{
-	Super::BeginPlay();	
-}
 
-void AProjectiles::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 

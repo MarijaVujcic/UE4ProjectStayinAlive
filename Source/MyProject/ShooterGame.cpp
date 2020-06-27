@@ -61,6 +61,24 @@ void AShooterGame::RepeatLevel(FString LevelName)
 	UGameplayStatics::OpenLevel(this, FName(*this->GameLevels[this->CurrentLevelNumber]), true);
 	
 }
+bool AShooterGame::IsLevelCompleted(FString LevelName)
+{
+	if (!this->ReadValue.IsEmpty() && this->ReadValue.Contains(LevelName))
+	{
+		int32 Index = this->ReadValue.Find(LevelName);
+		Index = Index + LevelName.Len() + 2;
+		while (this->ReadValue[Index] != ' ')
+		{
+			Index++;
+		}
+		Index += 1;
+		if (this->ReadValue[Index] == 'C')
+		{
+			return true;
+		}
+	}
+	return false;
+}
 /*
 * SetLevel Checks if nect level exist in GameLevels array, if does, it sets next level as current and return true, otherwise return false
 */

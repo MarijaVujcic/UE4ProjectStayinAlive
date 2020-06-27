@@ -19,14 +19,19 @@ public:
 		class USpringArmComponent* SpringArm;
 
 	UPROPERTY(Category = "Camera", EditAnywhere)
-		class UCameraComponent* Camera; 
+		class UCameraComponent* Camera;
+
 	UPROPERTY(Category = "Body", VisibleAnywhere, BluePrintReadOnly)
 		class USkeletalMeshComponent* SpaceshipMesh;
+
+	UPROPERTY(Category = "Body", VisibleAnywhere, BluePrintReadOnly)
+		class UAPlayerGameComponent* GameComponent;
+
 	UPROPERTY(Category = "Game", VisibleAnywhere, BluePrintReadOnly)
 		int32 TotalScore;
+
 	UPROPERTY(Category = "Game", VisibleAnywhere, BluePrintReadOnly)
 		int32 LevelScore;
-
 
 	UFUNCTION(BlueprintCallable)
 		void SetScore(int32 Total);
@@ -57,11 +62,9 @@ private:
 		float MaxSpeed;
 
 	/** Min forward speed */
-	UPROPERTY(Category = Yaw, EditAnywhere)
 		float MinSpeed;
 
 	/** Current forward speed */
-	UPROPERTY(Category = Yaw, EditAnywhere)
 	float CurrentForwardSpeed;
 
 	/** Current yaw speed */

@@ -12,20 +12,26 @@ class MYPROJECT_API AProjectiles : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+
 	AProjectiles();
+
 	/** Sphere collision component */
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
 		class USphereComponent* SphereCollisionComponent;
+
 	/** Projectile movement component */
 	UPROPERTY(Category = "Movement",VisibleAnywhere, BlueprintReadOnly)
 		class UProjectileMovementComponent* ProjectileMovement;
+
 	UPROPERTY(Category = "Body", VisibleAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* ProjectileMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 		float DamageAmount;
+
 	/** inits velocity of the projectile in the shoot direction */
 	void InitDirection(const FVector& ShootDirection);
+
 	/** called when projectile hits something */
 	UFUNCTION()
 		void OnHit(class UPrimitiveComponent* HitComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

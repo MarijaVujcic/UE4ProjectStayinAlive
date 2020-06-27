@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-
 #include "ShooterGame.generated.h"
 
 /**
@@ -15,6 +14,7 @@ class MYPROJECT_API AShooterGame : public AGameModeBase
 public:
 
 	AShooterGame();
+
 	UFUNCTION(BlueprintCallable)
 	void LevelComplete(FString LevelWhichIsCompleted, float Score);
 
@@ -38,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void RepeatLevel(FString LevelName);
+
+	UFUNCTION(BlueprintCallable)
+		bool IsLevelCompleted(FString LevelName);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
 		class UUserWidget* LevelCompleteWidget;

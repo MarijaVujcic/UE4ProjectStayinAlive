@@ -12,6 +12,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/Controller.h"
 #include "Engine/Engine.h"
+#include "APlayerGameComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Projectiles.h"
 
@@ -19,19 +20,18 @@
 ASpaceshipCharacter::ASpaceshipCharacter()
 {
 	this->SpaceshipMesh = GetMesh();
-	//this->SpaceshipMesh->SetupAttachment(GetCapsuleComponent());
 	this->SpringArm = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	this->SpringArm->SetupAttachment(RootComponent);
 	this->Camera = CreateDefaultSubobject<UCameraComponent>("CameraCharacter");
 	this->Camera->SetupAttachment(SpringArm);
-;
+	this->GameComponent = CreateDefaultSubobject<UAPlayerGameComponent>("GameComponent");
 	Acceleration = 500.f;
 	TurnSpeed = 70.f;
 	MaxSpeed = 10000.f;
 	MinSpeed = 0.f;
 	CurrentForwardSpeed = 0.f;
-
 	this->LevelScore = 0;
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 }
 
@@ -53,14 +53,12 @@ void ASpaceshipCharacter::Tick(float DeltaSeconds)
 
 void ASpaceshipCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveFoward", this, &ASpaceshipCharacter::MoveFoward);
 	PlayerInputComponent->BindAxis("MoveAround", this, &ASpaceshipCharacter::MoveAround);
 	PlayerInputComponent->BindAxis("Speed", this, &ASpaceshipCharacter::Speed);
 
-	//napravit svoju funkciju za Yaw
 	PlayerInputComponent->BindAxis("TurnYaw", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnPitch", this, &ASpaceshipCharacter::TurnPitch);
 	PlayerInputComponent->BindAxis("Roll", this, &ASpaceshipCharacter::RollMovement);
@@ -91,12 +89,10 @@ void ASpaceshipCharacter::MoveAround(float value)
 		
 		AddMovementInput(Direction, value);
 		CurrentLRSpeed = 50.f * Acceleration * GetWorld()->GetDeltaSeconds() * value;
-	
 	}
 	
 }
 
-// ako x onda da se smanjiva brzina
 void ASpaceshipCharacter::Speed(float value)
 {
 	bool bHasInput = !FMath::IsNearlyEqual(value, 0.f);
@@ -139,8 +135,6 @@ FVector ASpaceshipCharacter::GetPawnViewLocation() const
 	return Super::GetPawnViewLocation();
 }
 
-
-// procitat score iz filea GameInfo, sveukupni score i postavit si score varijablu
 void ASpaceshipCharacter::SetScore(int32 Total)
 {
 	this->TotalScore = Total;;
