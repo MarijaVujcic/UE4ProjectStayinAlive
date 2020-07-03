@@ -16,9 +16,9 @@ void UAPlayerGameComponent::BeginPlay()
 	{
 		ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &UAPlayerGameComponent::TakeDamage);
 	}
+	
 }
 
-// pogledat ovo take damage cini se malo cudno sa onim u projectiles
 void UAPlayerGameComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (Damage <= 0)

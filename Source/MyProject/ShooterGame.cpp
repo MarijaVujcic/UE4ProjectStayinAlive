@@ -27,10 +27,7 @@ AShooterGame::AShooterGame()
 void AShooterGame::BeginPlay()
 {
 	Super::BeginPlay();
-	if (this->GameLevels.Num() == 0)
-	{
-		// pozvati neki error widget ILI TO U BLUEPRINTU
-	}
+
 	if (FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile))
 	{
 		this->GameCompleted = this->ReadGameInfo();
@@ -49,9 +46,6 @@ void AShooterGame::StartLevel()
 	}
 	else if (!GetWorld()->GetMapName().Equals(this->GameLevels[this->CurrentLevelNumber]))
 	{
-
-		//HUDClass = ACrosshairHUD::StaticClass();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Uslo u begin open level %d"), this->CurrentLevelNumber));
 		UGameplayStatics::OpenLevel(this, FName(*this->GameLevels[this->CurrentLevelNumber]), true);
 	}
 }
@@ -137,14 +131,11 @@ bool AShooterGame::ReadGameInfo()
 		}
 		while ( this->ReadValue[RetIndex] != ' ')
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Uslo u while")));
-
 			MakeNew.AppendChar(this->ReadValue[RetIndex]);
 			RetIndex += 1;
 		}
 		return SetLevel(MakeNew);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("waat")));
 
 	return false;
 }
@@ -178,12 +169,9 @@ void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, float Score)
 		{
 			FileContent += this->GameLevels[i] + " 0 \n";
 		}
-		
 	}
-
 	FFileHelper::SaveStringToFile(FileHeader, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 	FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
-
 }
 
 /*
@@ -197,26 +185,10 @@ int32 AShooterGame::ReadTotalScore()
 		return 0;
 	}
 	int32 ReturnScore = 0;
-	int32 FindCompleted = 0;
-	FString Number;
 
 	for (int i = 0; i <= this->GameLevels.Num()-1; i++)
 	{
-		FindCompleted = this->ReadValue.Find(this->GameLevels[i]);
-		FindCompleted += this->GameLevels[i].Len() + 1;
-
-		while( this->ReadValue[FindCompleted] != '\n' )
-		{
-			if (this->ReadValue[FindCompleted] == ' ')
-			{
-				break;
-			}
-			Number.AppendChar(this->ReadValue[FindCompleted]);
-
-			FindCompleted+=1;
-		}
-		ReturnScore += FCString::Atoi(*Number);
-		Number.Empty();
+		ReturnScore += this->ReadLevelScore(this->GameLevels[i]);
 	}
 	return ReturnScore;
 }

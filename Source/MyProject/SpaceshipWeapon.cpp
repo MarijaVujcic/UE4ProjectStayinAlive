@@ -21,30 +21,23 @@ void ASpaceshipWeapon::OnFire()
 
 	if (MyOwner && this->ProjectileClass != NULL && World)
 	{
-		FVector EyeLocation;
-		FRotator EyeRotation;
-		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation); //vrati mi lokaciju i roticaiju kamere "ispuni"
-
-		FVector coordinate = this->WeponMesh->GetComponentLocation();
-		coordinate.Y += 0.001f;
+		FVector Coordinate = this->WeponMesh->GetComponentLocation();
+		Coordinate.Y += 0.001f;
 		FRotator ShootRotation = MyOwner->GetActorRotation();
 		ShootRotation.Pitch += 10.f;
 		FVector ShootDirection = ShootRotation.Vector();  
-		FTransform SpawnTM(coordinate);  //lokacija za spawn 
+		FTransform SpawnTM(Coordinate);
 
-		AProjectiles* const Projectile = Cast<AProjectiles>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ProjectileClass, SpawnTM)); // SPAWN PROJECTILE
+		AProjectiles* const Projectile = Cast<AProjectiles>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ProjectileClass, SpawnTM));
 
 		if (Projectile)
 		{
 			Projectile->Instigator = Instigator;
 			Projectile->SetOwner(this);
-			Projectile->InitDirection(ShootDirection); //init velocity
+			Projectile->InitDirection(ShootDirection); 
 			UGameplayStatics::FinishSpawningActor(Projectile, SpawnTM);
-			
 		}
-
 	}
-	
 }
 
 

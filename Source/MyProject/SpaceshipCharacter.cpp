@@ -82,13 +82,11 @@ void ASpaceshipCharacter::MoveAround(float value)
 {
 	if ((Controller != NULL) && (value != 0.0f))
 	{
-		// find out which way is forward
 		FRotator Rotation = Controller->GetControlRotation();
-		// add movement in that direction
 		const FVector Direction = FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y);
 		
 		AddMovementInput(Direction, value);
-		CurrentLRSpeed = 50.f * Acceleration * GetWorld()->GetDeltaSeconds() * value;
+		CurrentLRSpeed = 10.f * Acceleration * GetWorld()->GetDeltaSeconds() * value;
 	}
 	
 }

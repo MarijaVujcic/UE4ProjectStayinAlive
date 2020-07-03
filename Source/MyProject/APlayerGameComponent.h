@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "APlayerGameComponent.generated.h"
 
-// staviti amo total score i current score i zapisivat to
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYPROJECT_API UAPlayerGameComponent : public UActorComponent
 {

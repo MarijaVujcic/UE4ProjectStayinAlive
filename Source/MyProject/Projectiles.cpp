@@ -49,5 +49,11 @@ void AProjectiles::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, 
 	this->Destroy();
 }
 
+void AProjectiles::BeginPlay()
+{
+	Super::BeginPlay();
+}
+void AProjectiles::Tick(float DeltaTime)
+{
 
-
+}
