@@ -96,7 +96,12 @@ bool AShooterGame::SetLevel(FString LevelToSet)
 */
 void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, float Score)
 {
-	WriteGameInfo(LevelWhichIsCompleted, Score);
+	int32 Index = this->ReadValue.Find(LevelWhichIsCompleted);
+	Index = Index + LevelWhichIsCompleted.Len() + 2;
+	const uint8 Complete = *"COMPLETED\n";
+	FString sc = FString::FromInt(Score);
+	sc = sc + " COMPLETED\n";
+	this->ReadValue.InsertAt(Index, sc);
 }
 
 
@@ -121,8 +126,6 @@ bool AShooterGame::ReadGameInfo()
 	CompletedExist = this->ReadValue.Contains("COMPLETED");
 	if (CompletedExist)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Uslo u completed exist")));
-
 		RetIndex = this->ReadValue.Find("COMPLETED", ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 		RetIndex += 10;
 		if (RetIndex+2 >= this->ReadValue.Len())
@@ -188,7 +191,7 @@ int32 AShooterGame::ReadTotalScore()
 
 	for (int i = 0; i <= this->GameLevels.Num()-1; i++)
 	{
-		ReturnScore += this->ReadLevelScore(this->GameLevels[i]);
+		ReturnScore = ReturnScore + this->ReadLevelScore(this->GameLevels[i]);
 	}
 	return ReturnScore;
 }
