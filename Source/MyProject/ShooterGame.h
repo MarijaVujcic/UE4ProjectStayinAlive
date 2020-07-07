@@ -16,22 +16,19 @@ public:
 	AShooterGame();
 
 	UFUNCTION(BlueprintCallable)
-	void LevelComplete(FString LevelWhichIsCompleted, float Score);
+		void LevelComplete(FString LevelWhichIsCompleted, float Score, bool Rewrite);
 
 	UFUNCTION(BlueprintCallable)
-	bool SetLevel(FString LevelToSet);
+		bool SetLevel(FString LevelToSet);
 
 	UFUNCTION(BlueprintCallable)
-	int32 ReadTotalScore();
+		float ReadTotalScore();
 
 	UFUNCTION(BlueprintCallable)
-		int32 ReadLevelScore(FString LevelName);
+		float ReadLevelScore(FString LevelName);
 
 	UFUNCTION(BlueprintCallable)
-		void RewriteScore(int32 LevelScore, FString LevelName);
-
-	UFUNCTION(BlueprintCallable)
-	bool ReadGameInfo();
+		bool ReadGameInfo();
 
 	UFUNCTION(BlueprintCallable)
 		void StartLevel();
@@ -41,12 +38,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool IsLevelCompleted(FString LevelName);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
-		class UUserWidget* LevelCompleteWidget;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
-		class UUserWidget* GameCompleteWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG")
 		FString EndGameMap;

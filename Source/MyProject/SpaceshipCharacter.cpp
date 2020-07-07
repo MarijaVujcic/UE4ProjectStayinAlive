@@ -25,12 +25,15 @@ ASpaceshipCharacter::ASpaceshipCharacter()
 	this->Camera = CreateDefaultSubobject<UCameraComponent>("CameraCharacter");
 	this->Camera->SetupAttachment(SpringArm);
 	this->GameComponent = CreateDefaultSubobject<UAPlayerGameComponent>("GameComponent");
-	Acceleration = 500.f;
-	TurnSpeed = 70.f;
-	MaxSpeed = 10000.f;
-	MinSpeed = 0.f;
-	CurrentForwardSpeed = 0.f;
-	this->LevelScore = 0;
+	this->Acceleration = 500.f;
+	this->TurnSpeed = 70.f;
+	this->MaxSpeed = 10000.f;
+	this->MinSpeed = 0.f;
+	this->CurrentForwardSpeed = 0.f;
+	this->CurrentLRSpeed = 0.f;
+	this->CurrentPitchSpeed = 0.f;
+	this->CurrentRollSpeed = 0.f;
+	this->CurrentYawSpeed = 0.f;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 }

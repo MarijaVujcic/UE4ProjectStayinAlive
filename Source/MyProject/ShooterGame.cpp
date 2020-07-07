@@ -15,7 +15,7 @@
 AShooterGame::AShooterGame()
 {
 	this->CurrentLevelNumber = 0;
-	this->GameInfoFile = "GameInfo.txt";
+	this->GameInfoFile = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()) + "GameInfo.txt";
 	this->GameCompleted = false;
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -28,7 +28,7 @@ void AShooterGame::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile))
+	if (FPaths::FileExists(this->GameInfoFile))
 	{
 		this->GameCompleted = this->ReadGameInfo();
 	}
@@ -78,7 +78,7 @@ bool AShooterGame::IsLevelCompleted(FString LevelName)
 */
 bool AShooterGame::SetLevel(FString LevelToSet)
 {
-	// mozda mi treba neki uvjet jos amo
+
 	if (this->GameLevels.Contains(LevelToSet))
 	{
 		this->CurrentLevelNumber=this->GameLevels.Find(LevelToSet);
@@ -94,14 +94,30 @@ bool AShooterGame::SetLevel(FString LevelToSet)
 * @param FString - Level which is completed
 * @param int32 - score accomplished in that level
 */
-void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, float Score)
+void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, float Score, bool Rewrite)
 {
+	IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
+	Reading.DeleteFile(*this->GameInfoFile);
 	int32 Index = this->ReadValue.Find(LevelWhichIsCompleted);
-	Index = Index + LevelWhichIsCompleted.Len() + 2;
-	const uint8 Complete = *"COMPLETED\n";
-	FString sc = FString::FromInt(Score);
-	sc = sc + " COMPLETED\n";
+	Index = Index + LevelWhichIsCompleted.Len() + 1;
+	FString sc = FString::SanitizeFloat(Score);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Some debug message %c!"), this->ReadValue[Index]));
+
+	while (this->ReadValue[Index] != ' ')
+	{ 
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Some debug message %c!"),this->ReadValue[Index]));
+
+		this->ReadValue.RemoveAt(Index);
+		Index++;
+	}
+	//sc = sc + " ";
+	if (!Rewrite)
+	{
+		sc = sc + " COMPLETED";
+	}
+	
 	this->ReadValue.InsertAt(Index, sc);
+	FFileHelper::SaveStringToFile(*this->ReadValue, *this->GameInfoFile, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 }
 
 
@@ -116,8 +132,7 @@ void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, float Score)
 */
 bool AShooterGame::ReadGameInfo()
 {
-	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
-	FFileHelper::LoadFileToString(this->ReadValue,*(FilePath));
+	FFileHelper::LoadFileToString(this->ReadValue,*this->GameInfoFile);
 
 	int32 RetIndex = 0;
 	bool CompletedExist;
@@ -150,11 +165,10 @@ bool AShooterGame::ReadGameInfo()
 */
 void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, float Score)
 {
-	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
 	if (LevelWhichIsCompleted != "")
 	{
 		IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
-		Reading.DeleteFile(*FilePath);
+		Reading.DeleteFile(*this->GameInfoFile);
 	}
 
 	FString FileHeader = TEXT("*****************************************************\n");
@@ -170,24 +184,24 @@ void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, float Score)
 		}
 		else
 		{
-			FileContent += this->GameLevels[i] + " 0 \n";
+			FileContent += this->GameLevels[i] + " 0\n";
 		}
 	}
-	FFileHelper::SaveStringToFile(FileHeader, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
-	FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+	FFileHelper::SaveStringToFile(FileHeader, *this->GameInfoFile, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+	FFileHelper::SaveStringToFile(FileContent, *this->GameInfoFile, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 }
 
 /*
 * Reads total score of completed levels
 * @return int32 total game score
 */
-int32 AShooterGame::ReadTotalScore()
+float AShooterGame::ReadTotalScore()
 {
-	if (! FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile) || this->GameLevels.Num()==0 /*|| !this->ReadValue.Contains("COMPLETED")*/)
+	if ((!FPaths::FileExists(this->GameInfoFile) || this->GameLevels.Num()==0) || ! this->ReadValue.Contains("COMPLETED"))
 	{
 		return 0;
 	}
-	int32 ReturnScore = 0;
+	float ReturnScore = 0;
 
 	for (int i = 0; i <= this->GameLevels.Num()-1; i++)
 	{
@@ -201,11 +215,11 @@ int32 AShooterGame::ReadTotalScore()
 * @param FString - level which will be searched for
 * @return int32 - level score
 */
-int32 AShooterGame::ReadLevelScore(FString LevelName)
+float AShooterGame::ReadLevelScore(FString LevelName)
 {
-	if (!FPaths::FileExists(FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile) || this->GameLevels.Num() == 0 /*|| !this->ReadValue.Contains("COMPLETED")*/)
+	if ((! FPaths::FileExists(this->GameInfoFile) || this->GameLevels.Num() == 0) || ! this->ReadValue.Contains("COMPLETED"))
 	{
-		return -1;
+		return 0;
 	}
 	int32 ReturnScore = 0;
 	int32 FindCompleted = 0;
@@ -228,24 +242,6 @@ int32 AShooterGame::ReadLevelScore(FString LevelName)
 	ReturnScore += FCString::Atoi(*Number);
 	Number.Empty();
 	
-	return ReturnScore;
+	return float(ReturnScore);
 }
 
-/*
-* Rewrite game info file with new informations of certain level
-* @param int32 - level score to rewrite
-* @param FString - level name to rewrite score for
-*/
-void AShooterGame::RewriteScore(int32 LevelScore, FString LevelName)
-{
-	IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
-	FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::GameSavedDir()) + this->GameInfoFile;
-	const uint8 NewScore = LevelScore;
-	const uint8 Complete = *"COMPLETED\n";
-
-	IFileHandle* HandleWriting = Reading.OpenWrite(*FilePath);
-	HandleWriting->Seek(this->ReadValue.Find(LevelName) + LevelName.Len() + 2);
-	HandleWriting->Write(&NewScore,  sizeof(NewScore));
-	HandleWriting->Write(&Complete, sizeof(Complete));
-	delete HandleWriting;
-}
