@@ -34,7 +34,7 @@ void AShooterGame::BeginPlay()
 	}
 	else
 	{
-		this->WriteGameInfo("");
+		this->WriteGameInfo();
 	}
 }
 
@@ -78,7 +78,6 @@ bool AShooterGame::IsLevelCompleted(FString LevelName)
 */
 bool AShooterGame::SetLevel(FString LevelToSet)
 {
-
 	if (this->GameLevels.Contains(LevelToSet))
 	{
 		this->CurrentLevelNumber=this->GameLevels.Find(LevelToSet);
@@ -101,18 +100,14 @@ void AShooterGame::LevelComplete(FString LevelWhichIsCompleted, float Score, boo
 	int32 Index = this->ReadValue.Find(LevelWhichIsCompleted);
 	Index = Index + LevelWhichIsCompleted.Len() + 1;
 	FString sc = FString::SanitizeFloat(Score);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Some debug message %c!"), this->ReadValue[Index]));
 
-	while (this->ReadValue[Index] != ' ')
+	while ( this->ReadValue[Index] != ' ' )
 	{ 
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Some debug message %c!"),this->ReadValue[Index]));
-
 		this->ReadValue.RemoveAt(Index);
-		Index++;
 	}
-	//sc = sc + " ";
 	if (!Rewrite)
 	{
+		this->ReadValue.RemoveAt(Index);
 		sc = sc + " COMPLETED";
 	}
 	
@@ -163,13 +158,10 @@ bool AShooterGame::ReadGameInfo()
 * WriteGameInfo - (if GameInfoFile doesn't exist, first time creation of file) create and write levels informations in GameInfoFile
 *
 */
-void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, float Score)
+void AShooterGame::WriteGameInfo()
 {
-	if (LevelWhichIsCompleted != "")
-	{
-		IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
-		Reading.DeleteFile(*this->GameInfoFile);
-	}
+	IPlatformFile& Reading = FPlatformFileManager::Get().GetPlatformFile();
+	Reading.DeleteFile(*this->GameInfoFile);
 
 	FString FileHeader = TEXT("*****************************************************\n");
 	FileHeader += TEXT("***************   GAME INFO FILE   ******************\n");
@@ -177,15 +169,8 @@ void AShooterGame::WriteGameInfo(FString LevelWhichIsCompleted, float Score)
 	FileHeader += TEXT("LEVEL_NAME SCORE STATUS\n\n");
 	FString FileContent;
 	for (int i = 0; i < this->GameLevels.Num(); i++)
-	{
-		if (LevelWhichIsCompleted.Equals(this->GameLevels[i]))
-		{
-			FileContent +=   this->GameLevels[i] + ' ' + FString::FromInt(Score) +" COMPLETED\n";
-		}
-		else
-		{
-			FileContent += this->GameLevels[i] + " 0\n";
-		}
+	{	
+			FileContent += this->GameLevels[i] + " 0 \n";
 	}
 	FFileHelper::SaveStringToFile(FileHeader, *this->GameInfoFile, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 	FFileHelper::SaveStringToFile(FileContent, *this->GameInfoFile, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
